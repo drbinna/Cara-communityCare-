@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Cara — CommunityCare's AI voice receptionist. Available 24/7 to help with your health insurance needs." />
+  <title>Cara | CommunityCare Virtual Receptionist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ============ HEADER ============ -->
+    <header class="header" role="banner">
+      <div class="header__inner">
+        <div class="header__brand">
+          <svg class="header__logo" width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+            <circle cx="18" cy="18" r="16" fill="#0078b4" opacity="0.2"/>
+            <path d="M18 4C10.268 4 4 10.268 4 18s6.268 14 14 14 14-6.268 14-14S25.732 4 18 4zm0 3c2.56 0 4.913.87 6.8 2.324l-2.126 2.126A8.44 8.44 0 0018 10c-4.694 0-8.5 3.806-8.5 8.5S13.306 27 18 27s8.5-3.806 8.5-8.5a8.44 8.44 0 00-1.45-4.674l2.126-2.126A10.95 10.95 0 0129 18c0 6.075-4.925 11-11 11S7 24.075 7 18 11.925 7 18 7z" fill="#0078b4"/>
+            <circle cx="18" cy="18" r="4" fill="#00a878"/>
+          </svg>
+          <span class="header__name">CommunityCare</span>
+        </div>
+        <div class="header__status" id="connectionStatus" role="status" aria-live="polite">
+          <span class="status-dot status-dot--offline" id="statusDot"></span>
+          <span class="status-text" id="statusText">Offline</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main" role="main">
+
+      <!-- -------- IDLE STATE -------- -->
+      <section class="state state--idle" id="stateIdle" aria-label="Ready to call">
+        <div class="idle__container">
+          <div class="idle__avatar-wrap">
+            <div class="avatar-glow"></div>
+            <img
+              src="/cara-avatar.png"
+              alt="Cara, your CommunityCare virtual receptionist"
+              class="idle__avatar"
+              width="180"
+              height="180"
+            />
+          </div>
+          <h1 class="idle__title">
+            Meet <span class="highlight">Cara</span>
+          </h1>
+          <p class="idle__subtitle">Your CommunityCare Virtual Receptionist</p>
+          <p class="idle__tagline">Available 24/7 to help with your insurance needs</p>
+
+          <button class="btn btn--call" id="btnCall" aria-label="Start a call with Cara">
+            <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.58.11.35.03.74-.25 1.02l-2.2 2.19z" fill="currentColor"/>
+            </svg>
+            Call Now
+          </button>
+
+          <div class="idle__languages" aria-label="Supported languages">
+            <span class="lang-badge lang-badge--active">EN</span>
+            <span class="lang-badge lang-badge--active">ES</span>
+            <span class="lang-badge">+12 more</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------- ACTIVE CALL STATE -------- -->
+      <section class="state state--active hidden" id="stateActive" aria-label="Active call with Cara">
+        <div class="active__container">
+
+          <!-- Top bar: timer + status -->
+          <div class="active__topbar">
+            <div class="active__timer" id="callTimer" aria-label="Call duration" role="timer">
+              <span class="timer__dot"></span>
+              00:00
+            </div>
+            <div class="active__speaker-label" id="speakerLabel">Connecting…</div>
+          </div>
+
+          <!-- Animated orb -->
+          <div class="active__orb-wrap">
+            <canvas id="orbCanvas" width="260" height="260" aria-hidden="true"></canvas>
+            <img
+              src="/cara-avatar.png"
+              alt=""
+              class="active__avatar-mini"
+              width="90"
+              height="90"
+              aria-hidden="true"
+            />
+          </div>
+
+          <!-- Transcript panel -->
+          <div class="transcript" id="transcriptPanel" role="log" aria-label="Call transcript" aria-live="polite">
+            <div class="transcript__messages" id="transcriptMessages">
+              <!-- JS-rendered messages -->
+            </div>
+          </div>
+
+          <!-- Call controls -->
+          <div class="active__controls" role="toolbar" aria-label="Call controls">
+            <button class="ctrl-btn" id="btnMute" aria-label="Mute microphone" aria-pressed="false">
+              <svg class="ctrl-btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z" fill="currentColor"/>
+                <path d="M17 11a5 5 0 01-10 0H5a7 7 0 0014 0h-2z" fill="currentColor"/>
+                <rect x="11" y="18" width="2" height="4" rx="1" fill="currentColor"/>
+              </svg>
+              <span class="ctrl-btn__label">Mute</span>
+            </button>
+
+            <button class="ctrl-btn ctrl-btn--end" id="btnEndCall" aria-label="End the call">
+              <svg class="ctrl-btn__icon" width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.956.956 0 01-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 00-2.67-1.85.996.996 0 01-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z" fill="currentColor"/>
+              </svg>
+              <span class="ctrl-btn__label">End</span>
+            </button>
+
+            <button class="ctrl-btn" id="btnVolume" aria-label="Adjust volume" aria-pressed="false">
+              <svg class="ctrl-btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor"/>
+                <path d="M16.5 12A4.5 4.5 0 0014 7.97v8.05c1.48-.73 2.5-2.25 2.5-3.02z" fill="currentColor"/>
+                <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77 0-4.28-2.99-7.86-7-8.77z" fill="currentColor"/>
+              </svg>
+              <span class="ctrl-btn__label">Volume</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------- POST-CALL STATE -------- -->
+      <section class="state state--postcall hidden" id="statePostCall" aria-label="Call ended">
+        <div class="postcall__container">
+          <div class="postcall__icon-wrap">
+            <svg class="postcall__icon" width="64" height="64" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="#00a878" stroke-width="2" fill="none"/>
+              <path d="M8 12l3 3 5-5" stroke="#00a878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="postcall__title">Thank you for calling!</h2>
+          <p class="postcall__message">
+            Cara has noted your request. A member of our team will follow up if needed.
+          </p>
+
+          <div class="postcall__summary" id="callSummary">
+            <!-- Filled by JS with call duration / summary -->
+          </div>
+
+          <button class="btn btn--call btn--again" id="btnCallAgain" aria-label="Start another call with Cara">
+            <svg class="btn__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1.003 1.003 0 011.01-.24c1.12.37 2.33.57 3.58.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.46.57 3.58.11.35.03.74-.25 1.02l-2.2 2.19z" fill="currentColor"/>
+            </svg>
+            Call Again
+          </button>
+
+          <nav class="postcall__links" aria-label="Helpful links">
+            <a href="https://communitycareok.com" target="_blank" rel="noopener noreferrer" class="postcall__link">
+              communitycareok.com
+            </a>
+            <a href="https://communitycareok.com/find-a-doctor" target="_blank" rel="noopener noreferrer" class="postcall__link">
+              Find a Doctor
+            </a>
+            <a href="https://communitycareok.com/member-login" target="_blank" rel="noopener noreferrer" class="postcall__link">
+              Member Login
+            </a>
+          </nav>
+        </div>
+      </section>
+
+      <!-- -------- ERROR OVERLAY -------- -->
+      <div class="error-overlay hidden" id="errorOverlay" role="alert">
+        <div class="error-card">
+          <svg class="error-card__icon" width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="#ef4444" stroke-width="2" fill="none"/>
+            <path d="M12 8v4m0 4h.01" stroke="#ef4444" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <h3 class="error-card__title">Connection Issue</h3>
+          <p class="error-card__message" id="errorMessage">
+            We're unable to reach our service right now. Please try again in a moment.
+          </p>
+          <button class="btn btn--retry" id="btnRetry">Try Again</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer" role="contentinfo">
+      <p class="footer__copy">&copy; 2026 CommunityCare HMO, Inc. &middot; Tulsa, Oklahoma</p>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
